@@ -73,11 +73,19 @@ QtObject {
             md.use(this.markdownitTxt2tags);
 
         if (useTxt2tagsPlugin && useEditorHighlighting) {
-            script.addHighlightingRule("^= +.+? +=\\s*$",    "=", 12);
-            script.addHighlightingRule("^== +.+? +==\\s*$",  "=", 13);
-            script.addHighlightingRule("^=== +.+? +===\\s*$", "=", 14);
-            script.addHighlightingRule("^==== +.+? +====\\s*$", "=", 15);
+            // Headings: = H1 =  == H2 ==  …
+            script.addHighlightingRule("^= +.+? +=\\s*$",         "=", 12);
+            script.addHighlightingRule("^== +.+? +==\\s*$",       "=", 13);
+            script.addHighlightingRule("^=== +.+? +===\\s*$",     "=", 14);
+            script.addHighlightingRule("^==== +.+? +====\\s*$",   "=", 15);
             script.addHighlightingRule("^===== +.+? +=====\\s*$", "=", 16);
+            // Inline: //italic//  __underline__  --strikethrough--
+            script.addHighlightingRule("//.+?//",  "//", 7);
+            script.addHighlightingRule("__.+?__",  "__", 31);
+            script.addHighlightingRule("--.+?--", "--", -1, 0, 0,
+                { foregroundColor: "#888888" });
+            // Comment: % until end of line
+            script.addHighlightingRule("^%.*$", "%", 11);
         }
 
         //Allow file:// url scheme
