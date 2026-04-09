@@ -1,7 +1,7 @@
 {
-  "name": "Markdown-it markdown parser",
-  "identifier": "markdown-it",
-  "script": "markdown-it.qml",
+  "name": "txt2tags-it",
+  "identifier": "txt2tags-it",
+  "script": "txt2tags-it.qml",
   "resources": [
     "markdown-it.js",
     "markdown-it-deflist.js",
