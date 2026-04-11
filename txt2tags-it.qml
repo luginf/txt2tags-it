@@ -84,8 +84,9 @@ QtObject {
             script.addHighlightingRule("__.+?__",  "__", 31);
             script.addHighlightingRule("--.+?--", "--", -1, 0, 0,
                 { foregroundColor: "#888888" });
-            // Ordered list: + item
-            script.addHighlightingRule("^\\+ .+$", "+", 12);
+            // Ordered list: + item  (style -1 + custom color to avoid heading styles 12-16)
+            script.addHighlightingRule("^\\+ .+$", "+", -1, 0, 0,
+                { foregroundColor: "#4a9fd5" });
             // Comment: % until end of line
             script.addHighlightingRule("^%.*$", "%", 11);
         }
