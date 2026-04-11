@@ -34,6 +34,35 @@
    */
   function txt2tagsPlugin(md) {
 
+    // ── Override text rule to also stop at / (needed for //italic//) ─────────
+    // markdown-it's built-in text rule stops at isTerminatorChar characters.
+    // '/' (0x2F) is not in that set, so '//italic//' gets consumed as plain
+    // text before the italic inline rule can match it.
+    function isTerminatorCharExtended(ch) {
+      // 0x2F = '/' — added for txt2tags //italic//
+      if (ch === 0x2F) return true;
+      // Replicate markdown-it's isTerminatorChar exactly (v8.4.2)
+      switch (ch) {
+        case 0x0a: case 0x21: case 0x23: case 0x24: case 0x25: case 0x26:
+        case 0x2a: case 0x2b: case 0x2d: case 0x3a: case 0x3c: case 0x3d:
+        case 0x3e: case 0x40: case 0x5b: case 0x5c: case 0x5d: case 0x5e:
+        case 0x5f: case 0x60: case 0x7b: case 0x7d: case 0x7e:
+          return true;
+        default:
+          return false;
+      }
+    }
+    md.inline.ruler.at("text", function (state, silent) {
+      var pos = state.pos;
+      while (pos < state.posMax && !isTerminatorCharExtended(state.src.charCodeAt(pos))) {
+        pos++;
+      }
+      if (pos === state.pos) return false;
+      if (!silent) state.pending += state.src.slice(state.pos, pos);
+      state.pos = pos;
+      return true;
+    });
+
     // ── Block: headings ──────────────────────────────────────────────────────
     // = H1 =   == H2 ==   === H3 ===   ==== H4 ====   ===== H5 =====
     // Rules:
@@ -132,6 +161,42 @@
           state.push("txt2tags_u_close", "u", -1);
         }
         state.pos = end + 2;
+        return true;
+      }
+    );
+
+    // ── Inline: [label url] links ────────────────────────────────────────────
+    // Registered BEFORE 'link' so markdown-it's own link rule doesn't consume [.
+    // If the content matches [text](url) (standard markdown), we let the link
+    // rule handle it by returning false when a '(' immediately follows ']'.
+    md.inline.ruler.before(
+      "link",
+      "txt2tags_link",
+      function (state, silent) {
+        var pos = state.pos;
+        var src = state.src;
+        if (src.charCodeAt(pos) !== 0x5B /* [ */) return false;
+        var closePos = src.indexOf("]", pos + 1);
+        if (closePos < 0) return false;
+        // Let standard markdown [text](url) pass through
+        if (src.charCodeAt(closePos + 1) === 0x28 /* ( */) return false;
+        var content = src.slice(pos + 1, closePos);
+        // Last space separates label from URL
+        var lastSpace = content.lastIndexOf(" ");
+        if (lastSpace < 0) return false;
+        var label = content.slice(0, lastSpace);
+        var url = content.slice(lastSpace + 1);
+        if (!label || !url) return false;
+        // URL must start with a recognised scheme or /
+        if (!/^[a-zA-Z][\w+\-.]*:\/\/|^\//.test(url)) return false;
+        if (!silent) {
+          var token = state.push("link_open", "a", 1);
+          token.attrs = [["href", url]];
+          token.markup = "txt2tags";
+          state.push("text", "", 0).content = label;
+          state.push("link_close", "a", -1).markup = "txt2tags";
+        }
+        state.pos = closePos + 1;
         return true;
       }
     );
