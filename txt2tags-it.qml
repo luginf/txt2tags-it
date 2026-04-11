@@ -74,11 +74,13 @@ QtObject {
 
         if (useTxt2tagsPlugin && useEditorHighlighting) {
             // Headings: = H1 =  == H2 ==  …
-            script.addHighlightingRule("^= +.+? +=\\s*$",         "=", 12);
-            script.addHighlightingRule("^== +.+? +==\\s*$",       "=", 13);
-            script.addHighlightingRule("^=== +.+? +===\\s*$",     "=", 14);
-            script.addHighlightingRule("^==== +.+? +====\\s*$",   "=", 15);
-            script.addHighlightingRule("^===== +.+? +=====\\s*$", "=", 16);
+            // colorIndex -1 + explicit options (same approach as strikethrough)
+            // avoids relying on QOwnNotes internal colorIndex values.
+            script.addHighlightingRule("^= +.+? +=\\s*$",         "=", -1, true,  false, { foregroundColor: "#0078d4" });
+            script.addHighlightingRule("^== +.+? +==\\s*$",       "=", -1, true,  false, { foregroundColor: "#0078d4" });
+            script.addHighlightingRule("^=== +.+? +===\\s*$",     "=", -1, false, false, { foregroundColor: "#0078d4" });
+            script.addHighlightingRule("^==== +.+? +====\\s*$",   "=", -1, false, false, { foregroundColor: "#0078d4" });
+            script.addHighlightingRule("^===== +.+? +=====\\s*$", "=", -1, false, false, { foregroundColor: "#0078d4" });
             // Inline: //italic//  __underline__  --strikethrough--
             script.addHighlightingRule("//.+?//",  "//", 7);
             script.addHighlightingRule("__.+?__",  "__", 31);
