@@ -84,6 +84,8 @@ QtObject {
             script.addHighlightingRule("__.+?__",  "__", 31);
             script.addHighlightingRule("--.+?--", "--", -1, 0, 0,
                 { foregroundColor: "#888888" });
+            // Ordered list: + item
+            script.addHighlightingRule("^\\+ .+$", "+", 12);
             // Comment: % until end of line
             script.addHighlightingRule("^%.*$", "%", 11);
         }
@@ -157,7 +159,7 @@ QtObject {
         //Get original styles
         var head = html.match(new RegExp("<head>(?:.|\n)*?</head>"))[0];
         //Add custom styles
-        head = head.replace("</style>", "table {border-spacing: 0; border-style: solid; border-width: 1px; border-collapse: collapse; margin-top: 0.5em;} th, td {padding: 0 5px;}" + customStylesheet + "</style>");
+        head = head.replace("</style>", "table {border-spacing: 0; border-style: solid; border-width: 1px; border-collapse: collapse; margin-top: 0.5em;} th, td {padding: 0 5px;} del {text-decoration: line-through;}" + customStylesheet + "</style>");
         mdHtml = "<html>" + head + "<body>" + mdHtml + "</body></html>";
         return mdHtml;
     }

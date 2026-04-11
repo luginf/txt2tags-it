@@ -120,6 +120,51 @@
       }
     );
 
+    // ── Block: + numbered list ───────────────────────────────────────────────
+    // Lines starting with '+ ' (plus space) form an ordered list.
+    // Registered BEFORE 'list' so markdown-it's own list rule doesn't consume +.
+    md.block.ruler.before(
+      "list",
+      "txt2tags_ordered_list",
+      function (state, startLine, endLine, silent) {
+        var pos = state.bMarks[startLine] + state.tShift[startLine];
+        if (state.src.charCodeAt(pos) !== 0x2B /* + */ ||
+            state.src.charCodeAt(pos + 1) !== 0x20 /* space */) return false;
+        if (silent) return true;
+
+        var items = [];
+        var line = startLine;
+        while (line < endLine) {
+          pos = state.bMarks[line] + state.tShift[line];
+          if (state.src.charCodeAt(pos) !== 0x2B ||
+              state.src.charCodeAt(pos + 1) !== 0x20) break;
+          items.push(state.src.slice(pos + 2, state.eMarks[line]));
+          line++;
+        }
+
+        var token = state.push("ordered_list_open", "ol", 1);
+        token.map = [startLine, line];
+        token.markup = "+";
+
+        for (var i = 0; i < items.length; i++) {
+          token = state.push("list_item_open", "li", 1);
+          token.map = [startLine + i, startLine + i + 1];
+          token.markup = "+";
+
+          token = state.push("inline", "", 0);
+          token.content = items[i];
+          token.map = [startLine + i, startLine + i + 1];
+          token.children = [];
+
+          state.push("list_item_close", "li", -1).markup = "+";
+        }
+
+        state.push("ordered_list_close", "ol", -1).markup = "+";
+        state.line = line;
+        return true;
+      }
+    );
+
     // ── Inline: //italic// ───────────────────────────────────────────────────
     // Avoid matching inside URLs (e.g. http://)
     md.inline.ruler.push(
