@@ -90,7 +90,7 @@ QtObject {
             script.addHighlightingRule("^\\+ .+$", "+", -1, 0, 0,
                 { foregroundColor: "#4a9fd5" });
             // Comment: % until end of line
-            script.addHighlightingRule("^%.*$", "%", 11);
+            script.addHighlightingRule("^%.*$", "%", -1, false, true, { foregroundColor: "#888888" });
         }
 
         //Allow file:// url scheme
@@ -143,7 +143,7 @@ QtObject {
                 finalPath = rawPath.replace(/\\/g, '/');
             else
                 // Relative path → resolve against base
-                finalPath = resolvePath(basePath, rawPath.replace(/^\.\/+/, ''));
+                finalPath = resolvePath(path, rawPath.replace(/^\.\/+/, ''));
             return `${prefix}file://${finalPath}"`;
         });
         // Don't attempt to render in the preview, it doesn't support mathml or complex css

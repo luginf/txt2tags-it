@@ -265,9 +265,11 @@
           label  = content;
         }
         if (!target) return false;
+        // Append .md so the QOwnNotes hook resolves to a note file path
+        var href = /\.md$/i.test(target) ? target : (target + ".md");
         if (!silent) {
           var token = state.push("link_open", "a", 1);
-          token.attrs = [["href", target]];
+          token.attrs = [["href", href]];
           token.markup = "wikilink";
           state.push("text", "", 0).content = label;
           state.push("link_close", "a", -1).markup = "wikilink";
