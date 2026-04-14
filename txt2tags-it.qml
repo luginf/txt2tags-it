@@ -15,7 +15,7 @@ QtObject {
             "name": "Markdown-it options",
             "description": "For available options and default values see <a href='https://github.com/markdown-it/markdown-it/blob/main/lib/presets'>markdown-it presets</a>.",
             "type": "text",
-            "default": "{" + "\n" + "    //html:         false,        // Enable HTML tags in source" + "\n" + "    //xhtmlOut:     false,        // Use '/' to close single tags (<br />)" + "\n" + "    //breaks:       false,        // Convert '\\n' in paragraphs into <br>" + "\n" + "    //langPrefix:   'language-',  // CSS language prefix for fenced blocks" + "\n" + "    //linkify:      false,        // autoconvert URL-like texts to links" + "\n" + "" + "\n" + "    // Enable some language-neutral replacements + quotes beautification" + "\n" + "    //typographer:  false," + "\n" + "" + "\n" + "    // Double + single quotes replacement pairs, when typographer enabled," + "\n" + "    // and smartquotes on. Could be either a String or an Array." + "\n" + "    //" + "\n" + "    // For example, you can use '«»„“' for Russian, '„“‚‘' for German," + "\n" + "    // and ['«\\xA0', '\\xA0»', '‹\\xA0', '\\xA0›'] for French (including nbsp)." + "\n" + "    //quotes: '\\u201c\\u201d\\u2018\\u2019', /* “”‘’ */" + "\n" + "" + "\n" + "    // Highlighter function. Should return escaped HTML," + "\n" + "    // or '' if the source string is not changed and should be escaped externaly." + "\n" + "    // If result starts with <pre... internal wrapper is skipped." + "\n" + "    //" + "\n" + "    // function (/*str, lang*/) { return ''; }" + "\n" + "    //" + "\n" + "    //highlight: null," + "\n" + "" + "\n" + "    //maxNesting:   100            // Internal protection, recursion limit" + "\n" + "}"
+            "default": "{" + "\n" + "    html:          true,         // Enable HTML tags in source" + "\n" + "    //xhtmlOut:     false,        // Use '/' to close single tags (<br />)" + "\n" + "    //breaks:       false,        // Convert '\\n' in paragraphs into <br>" + "\n" + "    //langPrefix:   'language-',  // CSS language prefix for fenced blocks" + "\n" + "    //linkify:      false,        // autoconvert URL-like texts to links" + "\n" + "" + "\n" + "    // Enable some language-neutral replacements + quotes beautification" + "\n" + "    //typographer:  false," + "\n" + "" + "\n" + "    // Double + single quotes replacement pairs, when typographer enabled," + "\n" + "    // and smartquotes on. Could be either a String or an Array." + "\n" + "    //" + "\n" + "    // For example, you can use '«»„“' for Russian, '„“‚‘' for German," + "\n" + "    // and ['«\\xA0', '\\xA0»', '‹\\xA0', '\\xA0›'] for French (including nbsp)." + "\n" + "    //quotes: '\\u201c\\u201d\\u2018\\u2019', /* “”‘’ */" + "\n" + "" + "\n" + "    // Highlighter function. Should return escaped HTML," + "\n" + "    // or '' if the source string is not changed and should be escaped externaly." + "\n" + "    // If result starts with <pre... internal wrapper is skipped." + "\n" + "    //" + "\n" + "    // function (/*str, lang*/) { return ''; }" + "\n" + "    //" + "\n" + "    //highlight: null," + "\n" + "" + "\n" + "    //maxNesting:   100            // Internal protection, recursion limit" + "\n" + "}"
         },
         {
             "identifier": "useDeflistPlugin",
@@ -74,23 +74,18 @@ QtObject {
 
         if (useTxt2tagsPlugin && useEditorHighlighting) {
             // Headings: = H1 =  == H2 ==  …
-            // colorIndex -1 + explicit options (same approach as strikethrough)
-            // avoids relying on QOwnNotes internal colorIndex values.
-            script.addHighlightingRule("^= +.+? +=\\s*$",         "=", -1, true,  false, { foregroundColor: "#0078d4" });
-            script.addHighlightingRule("^== +.+? +==\\s*$",       "=", -1, true,  false, { foregroundColor: "#0078d4" });
-            script.addHighlightingRule("^=== +.+? +===\\s*$",     "=", -1, false, false, { foregroundColor: "#0078d4" });
-            script.addHighlightingRule("^==== +.+? +====\\s*$",   "=", -1, false, false, { foregroundColor: "#0078d4" });
-            script.addHighlightingRule("^===== +.+? +=====\\s*$", "=", -1, false, false, { foregroundColor: "#0078d4" });
+            script.addHighlightingRule("^= +.+? +=\\s*$",         "=", 12);
+            script.addHighlightingRule("^== +.+? +==\\s*$",       "=", 13);
+            script.addHighlightingRule("^=== +.+? +===\\s*$",     "=", 14);
+            script.addHighlightingRule("^==== +.+? +====\\s*$",   "=", 15);
+            script.addHighlightingRule("^===== +.+? +=====\\s*$", "=", 16);
             // Inline: //italic//  __underline__  --strikethrough--
             script.addHighlightingRule("//.+?//",  "//", 7);
             script.addHighlightingRule("__.+?__",  "__", 31);
             script.addHighlightingRule("--.+?--", "--", -1, 0, 0,
                 { foregroundColor: "#888888" });
-            // Ordered list: + item  (style -1 + custom color to avoid heading styles 12-16)
-            script.addHighlightingRule("^\\+ .+$", "+", -1, 0, 0,
-                { foregroundColor: "#4a9fd5" });
             // Comment: % until end of line
-            script.addHighlightingRule("^%.*$", "%", -1, false, true, { foregroundColor: "#888888" });
+            script.addHighlightingRule("^%.*$", "%", 11);
         }
 
         //Allow file:// url scheme

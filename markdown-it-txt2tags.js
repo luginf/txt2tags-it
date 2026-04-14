@@ -210,6 +210,42 @@
       }
     );
 
+    // ── Inline: [label url] links ────────────────────────────────────────────
+    // Registered BEFORE 'link' so markdown-it's own link rule doesn't consume [.
+    // If the content matches [text](url) (standard markdown), we let the link
+    // rule handle it by returning false when a '(' immediately follows ']'.
+    md.inline.ruler.before(
+      "link",
+      "txt2tags_link",
+      function (state, silent) {
+        var pos = state.pos;
+        var src = state.src;
+        if (src.charCodeAt(pos) !== 0x5B /* [ */) return false;
+        var closePos = src.indexOf("]", pos + 1);
+        if (closePos < 0) return false;
+        // Let standard markdown [text](url) pass through
+        if (src.charCodeAt(closePos + 1) === 0x28 /* ( */) return false;
+        var content = src.slice(pos + 1, closePos);
+        // Last space separates label from URL
+        var lastSpace = content.lastIndexOf(" ");
+        if (lastSpace < 0) return false;
+        var label = content.slice(0, lastSpace);
+        var url = content.slice(lastSpace + 1);
+        if (!label || !url) return false;
+        // URL must start with a recognised scheme or /
+        if (!/^[a-zA-Z][\w+\-.]*:\/\/|^\//.test(url)) return false;
+        if (!silent) {
+          var token = state.push("link_open", "a", 1);
+          token.attrs = [["href", url]];
+          token.markup = "txt2tags";
+          state.push("text", "", 0).content = label;
+          state.push("link_close", "a", -1).markup = "txt2tags";
+        }
+        state.pos = closePos + 1;
+        return true;
+      }
+    );
+
     // ── Inline: bare URLs ────────────────────────────────────────────────────
     // Matches scheme://... URLs that appear without brackets.
     // Registered BEFORE the text rule so the text rule doesn't consume the
@@ -279,42 +315,6 @@
       }
     );
 
-    // ── Inline: [label url] links ────────────────────────────────────────────
-    // Registered BEFORE 'link' so markdown-it's own link rule doesn't consume [.
-    // If the content matches [text](url) (standard markdown), we let the link
-    // rule handle it by returning false when a '(' immediately follows ']'.
-    md.inline.ruler.before(
-      "link",
-      "txt2tags_link",
-      function (state, silent) {
-        var pos = state.pos;
-        var src = state.src;
-        if (src.charCodeAt(pos) !== 0x5B /* [ */) return false;
-        var closePos = src.indexOf("]", pos + 1);
-        if (closePos < 0) return false;
-        // Let standard markdown [text](url) pass through
-        if (src.charCodeAt(closePos + 1) === 0x28 /* ( */) return false;
-        var content = src.slice(pos + 1, closePos);
-        // Last space separates label from URL
-        var lastSpace = content.lastIndexOf(" ");
-        if (lastSpace < 0) return false;
-        var label = content.slice(0, lastSpace);
-        var url = content.slice(lastSpace + 1);
-        if (!label || !url) return false;
-        // URL must start with a recognised scheme or /
-        if (!/^[a-zA-Z][\w+\-.]*:\/\/|^\//.test(url)) return false;
-        if (!silent) {
-          var token = state.push("link_open", "a", 1);
-          token.attrs = [["href", url]];
-          token.markup = "txt2tags";
-          state.push("text", "", 0).content = label;
-          state.push("link_close", "a", -1).markup = "txt2tags";
-        }
-        state.pos = closePos + 1;
-        return true;
-      }
-    );
-
     // ── Inline: --strikethrough-- ─────────────────────────────────────────────
     md.inline.ruler.push(
       "txt2tags_strike",
@@ -326,9 +326,9 @@
         var end = src.indexOf("--", start);
         if (end < 0 || end === start) return false;
         if (!silent) {
-          state.push("txt2tags_del_open", "del", 1);
+          state.push("txt2tags_s_open", "s", 1);
           state.push("text", "", 0).content = src.slice(start, end);
-          state.push("txt2tags_del_close", "del", -1);
+          state.push("txt2tags_s_close", "s", -1);
         }
         state.pos = end + 2;
         return true;
